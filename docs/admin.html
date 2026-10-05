@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Catch 359 — organizers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin">
+  <header class="topbar">
+    <a class="wordmark" href="index.html">Catch 359</a>
+    <nav aria-label="Account">
+      <span id="who"></span>
+      <button class="link" id="sign-out" type="button" hidden>Sign out</button>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+    <section id="not-configured" hidden>
+      <h1>Organizers</h1>
+      <p>The site isn't connected to a database yet. Add your Supabase URL and anon key to <code>config.js</code> (see the README), then reload this page.</p>
+      <p><a href="?demo">Preview this page with sample riders</a></p>
+    </section>
+
+    <section id="login" class="login" hidden>
+      <h1>Organizer login</h1>
+      <form id="login-form">
+        <label>Email<input name="email" type="email" autocomplete="username" required></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+        <p class="form-error" id="login-error" role="alert" hidden></p>
+        <button class="button" type="submit">Log in</button>
+      </form>
+    </section>
+
+    <section id="not-admin" hidden>
+      <h1>Not an organizer account</h1>
+      <p>You're logged in, but this account hasn't been added as an organizer. Add it in Supabase as described in the README, under "Add an organizer".</p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <div class="dash-head">
+        <h1>Riders</h1>
+        <dl class="counts">
+          <div><dt>On the start list</dt><dd id="c-registered">0</dd></div>
+          <div><dt>Waitlist</dt><dd id="c-waitlist">0</dd></div>
+          <div><dt>Withdrawn</dt><dd id="c-withdrawn">0</dd></div>
+          <div><dt>Countries</dt><dd id="c-countries">0</dd></div>
+        </dl>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <h2>Registration</h2>
+          <p id="reg-state"></p>
+          <button class="button secondary" type="button" id="toggle-reg"></button>
+        </div>
+        <div class="control">
+          <h2>Start spot draw</h2>
+          <p id="draw-state"></p>
+          <div class="btns">
+            <button class="button" type="button" id="run-draw">Run the draw</button>
+            <button class="button secondary" type="button" id="toggle-publish"></button>
+          </div>
+        </div>
+      </div>
+
+      <p class="admin-msg" id="admin-msg" role="status" aria-live="polite"></p>
+
+      <div class="table-tools">
+        <label>Search<input id="search" type="search" placeholder="Name, email, country or club"></label>
+        <label>Show
+          <select id="filter">
+            <option value="all">Everyone</option>
+            <option value="registered">Start list</option>
+            <option value="waitlist">Waitlist</option>
+            <option value="withdrawn">Withdrawn</option>
+          </select>
+        </label>
+        <button class="button secondary" type="button" id="export">Download CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Spot</th>
+              <th scope="col">Rider</th>
+              <th scope="col">Contact</th>
+              <th scope="col">Emergency contact</th>
+              <th scope="col">Experience</th>
+              <th scope="col">Signed up</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <p class="empty" id="empty" hidden>No riders match.</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

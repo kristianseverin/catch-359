@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catch 359 — sign up</title>
+  <meta name="description" content="Catch 359: 360 ultra cyclists start 1° apart on Denmark's biggest circle, 578 km. Get caught by the rider behind you and you're out.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23C8102E' stroke-width='4' stroke-dasharray='66 3'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip" href="#signup">Skip to sign-up</a>
+
+  <header class="topbar">
+    <a class="wordmark" href="#top">Catch 359</a>
+    <nav aria-label="Sections">
+      <a href="#rules">Rules</a>
+      <a href="#signup">Sign up</a>
+      <a href="#startlist" id="nav-startlist" hidden>Start list</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-text">
+        <h1>Catch<br>359</h1>
+        <p class="lede">360 riders. One 578&nbsp;km circle around Denmark. Everyone starts at the same moment, one degree apart. If the rider behind you catches you, you're out.</p>
+
+        <dl class="facts">
+          <div><dt>Distance</dt><dd id="fact-km">578 km</dd></div>
+          <div><dt>Riders</dt><dd>360</dd></div>
+          <div><dt>Gap at the start</dt><dd id="fact-gap">1° ≈ 1.6 km</dd></div>
+          <div><dt>Date</dt><dd id="fact-date">To be announced</dd></div>
+        </dl>
+
+        <a class="button" href="#signup" id="hero-cta">Sign up</a>
+      </div>
+
+      <figure class="hero-ring" aria-labelledby="ring-caption">
+        <svg id="hero-ring" class="ring" role="img" aria-labelledby="ring-caption"></svg>
+        <figcaption id="ring-caption" class="ring-centre">
+          <span class="ring-big" id="ring-count">–</span>
+          <span class="ring-small" id="ring-label">of 360 spots taken</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="rules" class="rules" aria-labelledby="rules-title">
+      <h2 id="rules-title">How the race works</h2>
+      <dl class="rule-list">
+        <div class="rule">
+          <dt>Your spot on the circle</dt>
+          <dd>The route is <a id="route-link" href="https://www.komoot.com/tour/3331824715">Denmark's biggest circle</a>, 578&nbsp;km around. It is split into 360 start spots, one degree apart, so every rider has about 1.6&nbsp;km to the rider ahead and the rider behind. Spots are drawn at random once registration closes.</dd>
+        </div>
+        <div class="rule">
+          <dt>One start, one direction</dt>
+          <dd>All riders set off at the same moment and ride the same way around the circle.</dd>
+        </div>
+        <div class="rule">
+          <dt>Caught means out</dt>
+          <dd>When the rider behind you catches you, your race is over. The rider who caught you now chases whoever was ahead of you.</dd>
+        </div>
+        <div class="rule">
+          <dt>The winner</dt>
+          <dd>The last rider still in the race, the one who has caught everyone else, wins.</dd>
+        </div>
+        <div class="rule rule-ferry">
+          <dt>The ferry</dt>
+          <dd>One short crossing of about 100&nbsp;m is made by a ferry that shuttles back and forth on a fixed schedule. When several riders wait at the bank and cross on the same trip, whoever reached the bank first rolls off with a <strong id="ferry-minutes">2-minute</strong> head start on the others, so nobody gets caught just because of ferry timing.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section id="signup" class="signup" aria-labelledby="signup-title">
+      <div class="signup-intro">
+        <h2 id="signup-title">Sign up</h2>
+        <p id="signup-status">The first 360 riders get a start spot. After that you join the waitlist and move up if someone withdraws.</p>
+        <p class="demo-note" id="demo-note" hidden>Preview mode: the database isn't connected yet, so sign-ups on this page aren't saved.</p>
+      </div>
+
+      <form id="signup-form" novalidate>
+        <fieldset>
+          <legend>You</legend>
+          <div class="row">
+            <label>First name<input name="first_name" autocomplete="given-name" required maxlength="80"></label>
+            <label>Last name<input name="last_name" autocomplete="family-name" required maxlength="80"></label>
+          </div>
+          <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254"></label>
+          <div class="row">
+            <label>Country<input name="country" list="countries" autocomplete="country-name" required maxlength="80"></label>
+            <label><span>Club <span class="opt">(optional)</span></span><input name="club" maxlength="120"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Emergency contact</legend>
+          <div class="row">
+            <label>Name<input name="emergency_name" required maxlength="120"></label>
+            <label>Phone<input name="emergency_phone" type="tel" autocomplete="off" required maxlength="40" placeholder="+45 12 34 56 78"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Riding experience</legend>
+          <div class="row">
+            <label>Longest ride (km)<input name="longest_ride_km" type="number" inputmode="numeric" min="0" max="20000" required></label>
+            <label>Expected average speed (km/h)<input name="expected_speed_kmh" type="number" inputmode="decimal" min="5" max="60" step="0.5" required></label>
+          </div>
+          <label><span>Ultra events you've ridden <span class="opt">(optional)</span></span><textarea name="experience" rows="3" maxlength="1000" placeholder="e.g. a 1000 km brevet, a 24-hour race"></textarea></label>
+        </fieldset>
+
+        <label class="check">
+          <input type="checkbox" name="consent" required>
+          <span>I understand my name, country and club will appear on the public start list. My email, phone and emergency contact are only seen by the organizers.</span>
+        </label>
+
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+        <button class="button" type="submit" id="submit-btn">Sign up</button>
+      </form>
+
+      <div class="confirmation" id="confirmation" hidden tabindex="-1">
+        <h3 id="confirm-title">You're on the start list</h3>
+        <p id="confirm-text">Your start spot will be drawn when registration closes. The organizers will contact you by email with the details.</p>
+      </div>
+    </section>
+
+    <section id="startlist" class="startlist" aria-labelledby="startlist-title" hidden>
+      <h2 id="startlist-title">Start list</h2>
+      <p>Each rider's spot is their position on the circle, in degrees from the start of the route. Point at the ring or search for a name.</p>
+      <div class="startlist-grid">
+        <figure class="list-ring">
+          <svg id="list-ring" class="ring" role="img" aria-label="Start positions of all riders on the circle"></svg>
+          <figcaption class="ring-centre" aria-live="polite">
+            <span class="ring-big" id="pick-deg">–</span>
+            <span class="ring-name" id="pick-name">Point at a spot</span>
+            <span class="ring-small" id="pick-meta"></span>
+          </figcaption>
+        </figure>
+        <div class="list-panel">
+          <label class="search">Find a rider<input id="rider-search" type="search" autocomplete="off" placeholder="Name, country or club"></label>
+          <ol class="rider-list" id="rider-list"></ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><span id="footer-contact"></span> <a id="footer-route" href="https://www.komoot.com/tour/3331824715">Route on Komoot</a></p>
+    <p><a href="admin.html">Organizer login</a></p>
+  </footer>
+
+  <datalist id="countries">
+    <option>Denmark</option><option>Sweden</option><option>Norway</option><option>Germany</option>
+    <option>Netherlands</option><option>Belgium</option><option>United Kingdom</option><option>Ireland</option>
+    <option>France</option><option>Spain</option><option>Portugal</option><option>Italy</option>
+    <option>Switzerland</option><option>Austria</option><option>Poland</option><option>Czechia</option>
+    <option>Finland</option><option>Iceland</option><option>Estonia</option><option>Latvia</option>
+    <option>Lithuania</option><option>United States</option><option>Canada</option><option>Australia</option>
+    <option>New Zealand</option>
+  </datalist>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
