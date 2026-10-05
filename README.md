@@ -2,7 +2,7 @@
 
 Sign-up website for **Catch 359**: 360 ultra cyclists start one degree apart on Denmark's biggest circle (578 km). Everyone starts at once; if the rider behind you catches you, you're out. Last rider standing wins.
 
-- **Public page** (`docs/index.html`): event info and rules, the real route drawn with its 360 start spots, an elevation profile, GPX downloads of the route and of all 360 start spots, the sign-up form, and — once you publish the draw — the start list with every rider's degree and km.
+- **Public page** (`docs/index.html`): event info and rules, the real route drawn with its 360 start spots on a map of Jutland, an elevation profile, an interactive map (street and satellite view) where every start spot can be clicked, GPX downloads of the route and of all 360 start spots, the sign-up form, and — once you publish the draw — the start list with every rider's degree and km.
 - **Organizer page** (`docs/admin.html`): log in, see every rider with contact and emergency details, withdraw riders, move riders up from the waitlist, run the random start-spot draw, publish it, and download everything as CSV.
 - **Database** (`supabase/schema.sql`): Supabase (Postgres) tables, security rules and functions.
 
@@ -57,9 +57,14 @@ In the GitHub repository go to **Settings → Pages**, choose **Deploy from a br
 
 `route/source.gpx` is the route exported from [Komoot](https://www.komoot.com/tour/3331824715). From it, `tools/build_route.py` makes:
 
-- `docs/route-data.js` — the outline drawn on the page, the 360 spot positions and the elevation profile
+- `docs/route-data.js` — the map of Jutland, towns, the route outline, the 360 spot positions and the elevation profile
+- `docs/route-track.json` — the route line and spots for the interactive map
 - `docs/downloads/catch-359-route.gpx` — the route for riders' GPS devices
 - `docs/downloads/catch-359-start-spots.gpx` — all 360 start spots as waypoints
+
+The coastline in `route/land.json` comes from [Natural Earth](https://www.naturalearthdata.com) (public domain), made with `python3 tools/fetch_basemap.py`; only re-run it if you change `MAP_EXTENT` in `tools/build_route.py`. Town names and positions are listed in `TOWNS` in the same file (from [GeoNames](https://www.geonames.org), CC BY 4.0); edit that list to add or remove towns, and use `side` to move a label.
+
+The interactive map uses [Leaflet](https://leafletjs.com) with street tiles from CARTO (OpenStreetMap data) and satellite imagery from Esri. Both are free for a small event site like this, with the credits shown in the corner of the map. CARTO's free basemaps are meant for non-commercial use with limited traffic; if the event site gets very busy or commercial, look at their terms or switch to another tile provider in `docs/map.js`.
 
 If the route changes, replace `route/source.gpx` and run `python3 tools/build_route.py` (no extra packages needed), then commit the results. The GPX measures 580.8 km; spots are placed at equal fractions of that length, and km labels on the site use the official 578 km.
 
@@ -99,7 +104,9 @@ Nothing is saved until `config.js` has your Supabase details.
 docs/
   index.html   public page
   app.js       sign-up form, live counts, start list
-  ring.js      draws the route and its 360 start spots
+  ring.js      draws the map of Jutland with the route and its 360 start spots
+  map.js       the interactive map
+  route-track.json  route line and spots for the interactive map
   route-data.js  generated route outline, spots and elevation
   downloads/   GPX files for riders
   admin.html   organizer page
@@ -111,6 +118,8 @@ supabase/
   schema.sql   tables, security rules and functions
 route/
   source.gpx   the route from Komoot
+  land.json    coastline for the map (Natural Earth)
 tools/
   build_route.py  turns source.gpx into the files above
+  fetch_basemap.py  downloads and clips the coastline
 ```

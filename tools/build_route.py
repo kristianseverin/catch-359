@@ -24,13 +24,45 @@ SOURCE = ROOT / 'route' / 'source.gpx'
 OUT_JS = ROOT / 'docs' / 'route-data.js'
 OUT_ROUTE = ROOT / 'docs' / 'downloads' / 'catch-359-route.gpx'
 OUT_SPOTS = ROOT / 'docs' / 'downloads' / 'catch-359-start-spots.gpx'
+OUT_TRACK = ROOT / 'docs' / 'route-track.json'
+LAND = ROOT / 'route' / 'land.json'      # made by tools/fetch_basemap.py
 
 ROUTE_NAME = "Catch 359 - Denmark's biggest circle"
 SPOTS = 360
 OFFICIAL_KM = 578    # the distance quoted for the event; km labels use this
-VIEW_W = 400          # drawing width; height follows the route's shape
-PAD = 34              # room around the route for ticks and labels
+VIEW_W = 400          # drawing width; height follows the map extent
 SIMPLIFY_M = 120      # outline tolerance in metres (drawing only)
+TRACK_M = 12          # tolerance for the interactive map's route line
+LAT0 = 56.4           # reference latitude for the flat projection
+
+# Area of Jutland shown behind the route: west, south, east, north (degrees)
+MAP_EXTENT = (7.95, 55.40, 10.98, 57.30)
+
+# Larger towns shown on the map. Coordinates and populations: GeoNames (CC BY 4.0).
+# 'side' says where the label goes: 'e' east, 'w' west, 'n' north, 's' south.
+TOWNS = [
+    ('Aarhus',        56.157, 10.211, 237551, 'w'),
+    ('Aalborg',       57.048,  9.919, 122219, 'n'),
+    ('Esbjerg',       55.470,  8.452,  72205, 'e'),
+    ('Horsens',       55.861,  9.850,  58646, 'e'),
+    ('Randers',       56.461, 10.036,  55780, 'e'),
+    ('Kolding',       55.490,  9.472,  55363, 'e'),
+    ('Vejle',         55.709,  9.536,  51177, 'e'),
+    ('Herning',       56.136,  8.977,  44763, 's'),
+    ('Silkeborg',     56.170,  9.545,  41674, 'w'),
+    ('Fredericia',    55.566,  9.753,  36946, 'e'),
+    ('Viborg',        56.453,  9.402,  34831, 'e'),
+    ('Holstebro',     56.360,  8.616,  32072, 'e'),
+    ('Skive',         56.567,  9.027,  20815, 'e'),
+    ('Grenaa',        56.416, 10.878,  14317, 'w'),
+    ('Skanderborg',   56.034,  9.932,  13543, 'w'),
+    ('Thisted',       56.955,  8.695,  13020, 's'),
+    ('Varde',         55.621,  8.481,  12735, 'e'),
+    ('Struer',        56.492,  8.594,  11317, 'n'),
+    ('Hobro',         56.643,  9.790,  11064, 'e'),
+    ('Grindsted',     55.757,  8.928,   9414, 'e'),
+    ('Nykøbing Mors', 56.793,  8.853,   9326, 'e'),
+]
 
 
 def haversine_km(a, b):
@@ -83,23 +115,49 @@ def main():
     total = cum[-1]
 
     # Local flat projection (metres), fine for a region the size of Jutland.
-    lat0 = sum(p[0] for p in latlon) / len(latlon)
-    kx = 111_320 * math.cos(math.radians(lat0))
+    kx = 111_320 * math.cos(math.radians(LAT0))
     ky = 110_574
     xy_m = [(lon * kx, -lat * ky) for lat, lon in latlon]
 
-    minx = min(p[0] for p in xy_m); maxx = max(p[0] for p in xy_m)
-    miny = min(p[1] for p in xy_m); maxy = max(p[1] for p in xy_m)
-    scale = (VIEW_W - 2 * PAD) / (maxx - minx)
-    view_h = round((maxy - miny) * scale + 2 * PAD)
+    w, so, e, n = MAP_EXTENT
+    minx, maxx = w * kx, e * kx
+    miny, maxy = -n * ky, -so * ky
+    scale = VIEW_W / (maxx - minx)
+    view_h = round((maxy - miny) * scale)
 
     def to_view(p):
-        return ((p[0] - minx) * scale + PAD, (p[1] - miny) * scale + PAD)
+        return ((p[0] - minx) * scale, (p[1] - miny) * scale)
 
-    # Outline for drawing
+    def ll_view(lat, lon):
+        return to_view((lon * kx, -lat * ky))
+
+    # Route outline for drawing
     kept = simplify(xy_m, SIMPLIFY_M)
     outline = [to_view(xy_m[k]) for k in kept]
     path = 'M' + ' L'.join(f'{x:.1f},{y:.1f}' for x, y in outline) + ' Z'
+
+    # Land behind it
+    land_path = ''
+    if LAND.exists():
+        rings = json.loads(LAND.read_text())['rings']
+        parts = []
+        for ring in rings:
+            ring_m = [(lon * kx, -lat * ky) for lon, lat in ring]
+            # Simplify a closed ring in two halves (Douglas-Peucker needs distinct end points)
+            h = len(ring_m) // 2
+            keep = sorted(set(simplify(ring_m[:h + 1], 250)) | {h + i for i in simplify(ring_m[h:], 250)}) \
+                if len(ring_m) > 6 else range(len(ring_m))
+            pts_v = [to_view(ring_m[i]) for i in keep]
+            if len(pts_v) >= 3:
+                parts.append('M' + ' L'.join(f'{x:.1f},{y:.1f}' for x, y in pts_v) + ' Z')
+        land_path = ' '.join(parts)
+    else:
+        print('route/land.json not found: run tools/fetch_basemap.py to add the coastline')
+
+    towns = []
+    for name, lat, lon, pop, side in TOWNS:
+        x, y = ll_view(lat, lon)
+        towns.append({'name': name, 'x': round(x, 1), 'y': round(y, 1), 'pop': pop, 'side': side})
 
     # Centre of the circle, for pointing the ticks outwards
     cx = (min(p[0] for p in outline) + max(p[0] for p in outline)) / 2
@@ -140,6 +198,8 @@ def main():
         'width': VIEW_W,
         'height': view_h,
         'path': path,
+        'land': land_path,
+        'towns': towns,
         'measuredKm': round(total, 1),
         'climbM': round(gain / 10) * 10,
         'maxEleM': round(max(eles)),
@@ -150,6 +210,11 @@ def main():
         '// Generated by tools/build_route.py from route/source.gpx. Do not edit by hand.\n'
         f'export const route = {json.dumps(data, separators=(",", ":"))};\n',
         encoding='utf-8')
+
+    # Route line for the interactive map: [lat, lon] pairs, lightly simplified
+    track = [[round(latlon[k][0], 5), round(latlon[k][1], 5)] for k in simplify(xy_m, TRACK_M)]
+    OUT_TRACK.write_text(json.dumps({'track': track, 'spots': [[s['lat'], s['lon']] for s in spots]},
+                                    separators=(',', ':')), encoding='utf-8')
 
     # Clean route GPX for download (no planning timestamps)
     trkpts = '\n'.join(

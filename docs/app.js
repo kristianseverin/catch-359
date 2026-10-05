@@ -2,6 +2,7 @@ import { config } from './config.js';
 import { getClient, degToKm, fmtKm } from './db.js';
 import { createRing } from './ring.js';
 import { route } from './route-data.js';
+import { initRouteMap } from './map.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -206,8 +207,9 @@ function renderStartList(riders) {
 
   const show = (deg) => {
     const r = byDeg.get(deg);
-    $('pick-deg').textContent = deg == null ? '–' : `${deg}°`;
-    $('pick-name').textContent = deg == null ? 'Point at a spot' : (r ? r.rider_name : 'Empty spot');
+    $('pick-deg').textContent = deg == null ? '' : `${deg}°`;
+    $('pick-name').textContent = deg == null ? 'Point at a spot on the map to see who starts there.' : (r ? r.rider_name : 'Empty spot');
+    $('pick-name').classList.toggle('is-hint', deg == null);
     $('pick-meta').textContent = deg == null ? '' : [r && [r.country, r.club].filter(Boolean).join(', '), `km ${fmtKm(degToKm(deg))}`].filter(Boolean).join('  /  ');
   };
   let pinned = null;
@@ -247,6 +249,12 @@ function renderStartList(riders) {
   });
 }
 
+async function showRiders(riders, routeMapPromise) {
+  renderStartList(riders);
+  const m = await routeMapPromise;
+  m?.setRiders(new Map(riders.map((r) => [r.start_degree, r])));
+}
+
 // ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
@@ -269,6 +277,7 @@ async function loadStats(client) {
 async function main() {
   applyConfig();
   renderRoute();
+  const routeMap = initRouteMap($('route-map')).catch(() => null);
   const client = await getClient().catch(() => null);
   if (!client) $('demo-note').hidden = false;
 
@@ -278,9 +287,9 @@ async function main() {
   if (stats?.draw_published) {
     if (client) {
       const { data } = await client.rpc('get_start_list');
-      if (data?.length) renderStartList(data);
+      if (data?.length) showRiders(data, routeMap);
     } else {
-      renderStartList(sampleStartList());
+      showRiders(sampleStartList(), routeMap);
     }
   }
 }

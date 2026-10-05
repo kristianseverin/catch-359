@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23C8102E' stroke-width='4' stroke-dasharray='66 3'/%3E%3C/svg%3E">
 </head>
@@ -93,6 +94,11 @@
           <figcaption id="profile-caption">Elevation along the route, from spot 0 in Aarhus.</figcaption>
         </figure>
       </div>
+
+      <div class="route-map-wrap">
+        <div id="route-map" class="route-map" role="region" aria-label="Interactive map of the route and its 360 start spots"></div>
+        <p class="small">Click a spot to see its distance and open it in Google Maps. Switch to satellite view in the top-right corner. To zoom with the scroll wheel, click the map first.</p>
+      </div>
     </section>
 
     <section id="signup" class="signup" aria-labelledby="signup-title">
@@ -155,8 +161,8 @@
         <figure class="list-ring">
           <svg id="list-ring" class="ring" role="img" aria-label="Start positions of all riders on the circle"></svg>
           <figcaption class="ring-centre" aria-live="polite">
-            <span class="ring-big" id="pick-deg">–</span>
-            <span class="ring-name" id="pick-name">Point at a spot</span>
+            <span class="ring-big" id="pick-deg"></span>
+            <span class="ring-name is-hint" id="pick-name">Point at a spot on the map to see who starts there.</span>
             <span class="ring-small" id="pick-meta"></span>
           </figcaption>
         </figure>
@@ -170,6 +176,7 @@
 
   <footer class="footer">
     <p><span id="footer-contact"></span> <a id="footer-route" href="https://www.komoot.com/tour/3331824715">Route on Komoot</a></p>
+    <p>Map data: <a href="https://www.naturalearthdata.com">Natural Earth</a>, towns from <a href="https://www.geonames.org">GeoNames</a> (CC BY 4.0)</p>
     <p><a href="admin.html">Organizer login</a></p>
   </footer>
 
@@ -183,6 +190,7 @@
     <option>New Zealand</option>
   </datalist>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>
