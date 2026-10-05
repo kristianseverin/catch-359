@@ -178,9 +178,10 @@ $$;
 -- Organizer functions
 -- ---------------------------------------------------------------------------
 
--- Random draw: closes registration and gives every registered rider a start degree.
--- With 360 riders every degree 0–359 is used (1° apart). With fewer riders the
--- spots are spread as evenly as possible around the circle, in random order.
+-- Random draw: closes registration and gives every registered rider a random start spot.
+-- Spots are fixed points on the route, 578 km / 360 ≈ 1.6 km apart (spot k is k/360 of the
+-- way round from Aarhus). Each rider gets a different spot; with fewer than 360 riders some
+-- spots simply stay empty.
 create or replace function public.run_draw()
 returns json
 language plpgsql security definer set search_path = public, auth
@@ -198,14 +199,17 @@ begin
 
   update public.registrations set start_degree = null where start_degree is not null;
 
-  with shuffled as (
-    select id, row_number() over (order by random()) - 1 as k
+  with riders as (
+    select id, row_number() over (order by random()) as k
     from public.registrations where status = 'registered'
+  ), spots as (
+    select d, row_number() over (order by random()) as k
+    from generate_series(0, 359) d
   )
   update public.registrations r
-     set start_degree = floor(sh.k * 360.0 / n)::smallint
-    from shuffled sh
-   where r.id = sh.id;
+     set start_degree = s.d
+    from riders rd join spots s using (k)
+   where r.id = rd.id;
 
   update public.event_settings
      set registration_open = false, draw_done = true, draw_published = false, drawn_at = now()

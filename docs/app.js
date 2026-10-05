@@ -1,6 +1,7 @@
 import { config } from './config.js';
 import { getClient, degToKm, fmtKm } from './db.js';
 import { createRing } from './ring.js';
+import { route } from './route-data.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -29,6 +30,54 @@ function applyConfig() {
     a.href = `mailto:${config.contactEmail}`;
     a.textContent = config.contactEmail;
     $('footer-contact').append('Questions: ', a);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Route section: facts and elevation profile
+// ---------------------------------------------------------------------------
+function renderRoute() {
+  const prof = route.profile;
+  const max = Math.max(...prof);
+  const min = Math.min(...prof);
+  $('route-km').textContent = `${config.routeKm} km`;
+  $('route-gap').textContent = `${fmtKm(config.routeKm / 360)} km`;
+  $('route-climb').textContent = `${route.climbM.toLocaleString('en-GB')} m`;
+  $('route-max').textContent = `${Math.round(max)} m`;
+  $('route-min').textContent = min <= 1 ? 'Sea level' : `${Math.round(min)} m`;
+  $('route-komoot').href = config.routeUrl;
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const W = 600, H = 190, L = 34, R = 8, T = 10, B = 24;
+  const top = Math.ceil(max / 50) * 50;
+  const xs = (km) => L + (km / config.routeKm) * (W - L - R);
+  const ys = (m) => T + (1 - Math.max(0, m) / top) * (H - T - B);
+  const svg = $('profile');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('aria-label', `Elevation profile: ${route.climbM} m of climbing, highest point ${Math.round(max)} m`);
+  const add = (name, attrs, text) => {
+    const n = document.createElementNS(NS, name);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (text != null) n.textContent = text;
+    svg.appendChild(n);
+    return n;
+  };
+
+  for (let m = 0; m <= top; m += 50) {
+    add('line', { x1: L, x2: W - R, y1: ys(m), y2: ys(m), class: 'profile-grid' });
+    add('text', { x: L - 6, y: ys(m), 'text-anchor': 'end', 'dominant-baseline': 'middle', class: 'profile-axis' }, `${m} m`);
+  }
+  for (let km = 0; km <= config.routeKm; km += 100) {
+    add('text', { x: xs(km), y: H - 6, 'text-anchor': 'middle', class: 'profile-axis' }, km === 0 ? '0 km' : km);
+  }
+
+  const pts = prof.map((m, i) => `${xs((i / (prof.length - 1)) * config.routeKm).toFixed(1)},${ys(m).toFixed(1)}`);
+  add('path', { d: `M${xs(0)},${ys(0)} L${pts.join(' L')} L${xs(config.routeKm)},${ys(0)} Z`, class: 'profile-area' });
+  add('path', { d: `M${pts.join(' L')}`, class: 'profile-line' });
+
+  if (config.ferryKm != null) {
+    add('line', { x1: xs(config.ferryKm), x2: xs(config.ferryKm), y1: T, y2: ys(0), class: 'profile-ferry' });
+    add('text', { x: xs(config.ferryKm) + 4, y: T + 8, class: 'profile-axis' }, 'Ferry');
   }
 }
 
@@ -226,6 +275,7 @@ async function loadStats(client) {
 
 async function main() {
   applyConfig();
+  renderRoute();
   const client = await getClient().catch(() => null);
   if (!client) $('demo-note').hidden = false;
 

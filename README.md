@@ -2,7 +2,7 @@
 
 Sign-up website for **Catch 359**: 360 ultra cyclists start one degree apart on Denmark's biggest circle (578 km). Everyone starts at once; if the rider behind you catches you, you're out. Last rider standing wins.
 
-- **Public page** (`docs/index.html`): event info and rules (including the ferry head-start rule), a 360-spot ring showing how many spots are taken, the sign-up form, and — once you publish the draw — the start list with every rider's degree and km.
+- **Public page** (`docs/index.html`): event info and rules (including the ferry head-start rule), the real route drawn with its 360 start spots, an elevation profile, GPX downloads of the route and of all 360 start spots, the sign-up form, and — once you publish the draw — the start list with every rider's degree and km.
 - **Organizer page** (`docs/admin.html`): log in, see every rider with contact and emergency details, withdraw riders, move riders up from the waitlist, run the random start-spot draw, publish it, and download everything as CSV.
 - **Database** (`supabase/schema.sql`): Supabase (Postgres) tables, security rules and functions.
 
@@ -11,7 +11,7 @@ No build step: the site is plain HTML, CSS and JavaScript, hosted free on GitHub
 ## How sign-ups work
 
 1. The first 360 riders go on the start list. After that, new riders join the waitlist.
-2. When you run the draw, registration closes and every rider on the start list gets a random degree from 0 to 359. With exactly 360 riders every degree is used, so riders are 1° (about 1.6 km) apart. With fewer riders the spots are spread as evenly as possible around the circle.
+2. When you run the draw, registration closes and every rider on the start list gets a random start spot from 0 to 359. Spots are fixed points on the route, 578 km / 360 ≈ 1.6 km apart along the road; spot 0 is in Aarhus and the numbers count up in the direction of travel. With fewer than 360 riders, some spots stay empty.
 3. You check the result, then publish it. Only then does the start list appear on the public page.
 4. If someone withdraws after the draw, their spot becomes empty. "Add to start list" on a waitlisted rider gives them a random free spot (for example the one that just opened up).
 
@@ -55,6 +55,16 @@ Privacy: the public can only see counts and, after you publish, each rider's nam
 
 In the GitHub repository go to **Settings → Pages**, choose **Deploy from a branch**, branch `main`, folder `/docs`, and save. The site appears at `https://<your-username>.github.io/catch-359/` after a minute or two, and the organizer page at `…/catch-359/admin.html`. You can point your own domain at it from the same settings page.
 
+## The route
+
+`route/source.gpx` is the route exported from [Komoot](https://www.komoot.com/tour/3331824715). From it, `tools/build_route.py` makes:
+
+- `docs/route-data.js` — the outline drawn on the page, the 360 spot positions and the elevation profile
+- `docs/downloads/catch-359-route.gpx` — the route for riders' GPS devices
+- `docs/downloads/catch-359-start-spots.gpx` — all 360 start spots as waypoints
+
+If the route changes, replace `route/source.gpx` and run `python3 tools/build_route.py` (no extra packages needed), then commit the results. The GPX measures 580.8 km; spots are placed at equal fractions of that length, and km labels on the site use the official 578 km.
+
 ## Preview without a database
 
 ```sh
@@ -91,7 +101,9 @@ Nothing is saved until `config.js` has your Supabase details.
 docs/
   index.html   public page
   app.js       sign-up form, live counts, start list
-  ring.js      the 360-spot ring
+  ring.js      draws the route and its 360 start spots
+  route-data.js  generated route outline, spots and elevation
+  downloads/   GPX files for riders
   admin.html   organizer page
   admin.js     organizer actions and CSV export
   config.js    event settings and Supabase keys
@@ -99,4 +111,8 @@ docs/
   styles.css, admin.css
 supabase/
   schema.sql   tables, security rules and functions
+route/
+  source.gpx   the route from Komoot
+tools/
+  build_route.py  turns source.gpx into the files above
 ```

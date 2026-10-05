@@ -1,9 +1,11 @@
-// Draws the 360-spot ring as SVG. Degree 0 is at the top, degrees run clockwise.
+// Draws the real route with its 360 start spots as SVG.
+// Spot 0 is the route's start; spots follow the direction of travel, 1/360 of the route apart.
+
+import { route } from './route-data.js';
 
 const NS = 'http://www.w3.org/2000/svg';
-const C = 200;            // centre of the 400×400 viewBox
-const R_IN = 152;
-const R_OUT = 180;
+const TICK_IN = 2.5;      // gap between the route line and a tick
+const TICK_OUT = 12;      // tick length
 
 function el(name, attrs = {}, parent) {
   const node = document.createElementNS(NS, name);
@@ -12,60 +14,59 @@ function el(name, attrs = {}, parent) {
   return node;
 }
 
-function point(deg, r) {
-  const a = (deg - 90) * Math.PI / 180;
-  return [C + r * Math.cos(a), C + r * Math.sin(a)];
+function label(parent, spot, text, cls, dist = 26) {
+  const x = spot.x + spot.nx * dist;
+  const y = spot.y + spot.ny * dist;
+  const dir = spot.nx * Math.sign(dist);
+  const anchor = Math.abs(spot.nx) < 0.35 ? 'middle' : dir > 0 ? 'start' : 'end';
+  const t = el('text', { x, y, 'text-anchor': anchor, 'dominant-baseline': 'middle', class: cls }, parent);
+  t.textContent = text;
+  return t;
 }
 
 /**
- * Create a ring inside `svg`.
+ * Create the route drawing inside `svg`.
  * Returns an object with:
- *   setFilled(set)        — degrees (Set<number>) drawn as taken
- *   setActive(deg|null)   — highlight one degree
- *   onHover(fn)           — fn(deg|null) when the pointer moves over a spot
- *   onSelect(fn)          — fn(deg) when a spot is clicked/tapped
+ *   setFilled(set)        — spots (Set<number>) drawn as taken
+ *   setActive(deg|null)   — highlight one spot
+ *   setInteractive(bool)  — allow pointing at spots
+ *   onHover(fn), onSelect(fn)
  */
 export function createRing(svg, { ferryDeg = null, animate = true } = {}) {
-  svg.setAttribute('viewBox', '0 0 400 400');
+  svg.setAttribute('viewBox', `0 0 ${route.width} ${route.height}`);
   svg.innerHTML = '';
 
-  el('circle', { cx: C, cy: C, r: (R_IN + R_OUT) / 2, class: 'ring-track' }, svg);
+  el('path', { d: route.path, class: 'route-line' }, svg);
 
   const ticks = [];
   const tickGroup = el('g', { class: 'ring-ticks' }, svg);
   const hitGroup = el('g', { class: 'ring-hits' }, svg);
 
-  for (let d = 0; d < 360; d++) {
-    const [x1, y1] = point(d, R_IN);
-    const [x2, y2] = point(d, R_OUT);
-    const t = el('line', { x1, y1, x2, y2, class: 'tick' }, tickGroup);
+  route.spots.forEach((s, d) => {
+    const t = el('line', {
+      x1: s.x + s.nx * TICK_IN, y1: s.y + s.ny * TICK_IN,
+      x2: s.x + s.nx * TICK_OUT, y2: s.y + s.ny * TICK_OUT,
+      class: 'tick',
+    }, tickGroup);
     if (animate) t.style.animationDelay = `${d * 2.5}ms`;
     ticks.push(t);
 
-    // Wider invisible wedge so each spot is easy to point at.
-    const [a1, b1] = point(d - 0.5, R_IN - 14);
-    const [a2, b2] = point(d + 0.5, R_IN - 14);
-    const [a3, b3] = point(d + 0.5, R_OUT + 10);
-    const [a4, b4] = point(d - 0.5, R_OUT + 10);
-    const hit = el('path', { d: `M${a1},${b1} L${a2},${b2} L${a3},${b3} L${a4},${b4} Z`, class: 'hit' }, hitGroup);
+    const hit = el('circle', { cx: s.x + s.nx * 6, cy: s.y + s.ny * 6, r: 6, class: 'hit' }, hitGroup);
     hit.dataset.deg = d;
-  }
+  });
   if (animate) svg.classList.add('is-drawing');
 
-  // Quarter marks: 0°, 90°, 180°, 270°
-  for (const d of [0, 90, 180, 270]) {
-    const [x1, y1] = point(d, R_OUT + 4);
-    const [x2, y2] = point(d, R_OUT + 12);
-    el('line', { x1, y1, x2, y2, class: 'quarter' }, svg);
-  }
+  // Start marker
+  const s0 = route.spots[0];
+  const start = el('g', { class: 'start-mark' }, svg);
+  el('circle', { cx: s0.x, cy: s0.y, r: 4 }, start);
+  label(start, s0, 'Spot 0, Aarhus', 'map-label', -12);   // inside the loop
 
   if (ferryDeg != null) {
+    const s = route.spots[Math.round(ferryDeg) % 360];
     const g = el('g', { class: 'ferry-mark' }, svg);
-    const [x, y] = point(ferryDeg, R_OUT + 14);
-    el('circle', { cx: x, cy: y, r: 4.5 }, g);
-    const [lx, ly] = point(ferryDeg, R_OUT + 28);
-    const label = el('text', { x: lx, y: ly, 'text-anchor': 'middle', 'dominant-baseline': 'middle' }, g);
-    label.textContent = 'Ferry';
+    el('circle', { cx: s.x, cy: s.y, r: 4.5 }, g);
+    label(g, s, 'Ferry', 'map-label', -12);
   }
 
   let hoverFn = () => {};
@@ -92,7 +93,10 @@ export function createRing(svg, { ferryDeg = null, animate = true } = {}) {
     setActive(deg) {
       if (active != null) ticks[active].classList.remove('is-active');
       active = deg;
-      if (deg != null) ticks[deg].classList.add('is-active');
+      if (deg != null) {
+        ticks[deg].classList.add('is-active');
+        tickGroup.appendChild(ticks[deg]);   // draw on top of its neighbours
+      }
     },
     setInteractive(on) {
       interactive = on;

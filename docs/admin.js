@@ -53,7 +53,8 @@ function demoApi() {
     async runDraw() {
       const reg = data.filter((r) => r.status === 'registered').sort(() => Math.random() - 0.5);
       data.forEach((r) => { r.start_degree = null; });
-      reg.forEach((r, k) => { r.start_degree = Math.floor((k * 360) / reg.length); });
+      const spots = [...Array(360).keys()].sort(() => Math.random() - 0.5);
+      reg.forEach((r, k) => { r.start_degree = spots[k]; });
       Object.assign(s, { registration_open: false, draw_done: true, draw_published: false });
       return { riders: reg.length };
     },
@@ -87,7 +88,7 @@ function renderControls() {
 
   const unplaced = rows.filter((r) => r.status === 'registered' && r.start_degree == null).length;
   let draw;
-  if (!settings.draw_done) draw = 'Not drawn yet. Running the draw closes registration and gives every rider on the start list a random spot.';
+  if (!settings.draw_done) draw = 'Not drawn yet. Running the draw closes registration and gives every rider on the start list a random spot out of the 360 (1.6 km apart).';
   else if (unplaced) draw = `Drawn, but ${unplaced} rider${unplaced === 1 ? ' has' : 's have'} no spot. Run the draw again to reshuffle everyone, or move riders from the waitlist with "Add to start list".`;
   else draw = settings.draw_published ? 'Drawn and published on the public page.' : 'Drawn, not published yet. Check the spots, then publish.';
   $('draw-state').textContent = draw;

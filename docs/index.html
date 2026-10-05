@@ -18,6 +18,7 @@
     <a class="wordmark" href="#top">Catch 359</a>
     <nav aria-label="Sections">
       <a href="#rules">Rules</a>
+      <a href="#route">Route</a>
       <a href="#signup">Sign up</a>
       <a href="#startlist" id="nav-startlist" hidden>Start list</a>
     </nav>
@@ -53,7 +54,7 @@
       <dl class="rule-list">
         <div class="rule">
           <dt>Your spot on the circle</dt>
-          <dd>The route is <a id="route-link" href="https://www.komoot.com/tour/3331824715">Denmark's biggest circle</a>, 578&nbsp;km around. It is split into 360 start spots, one degree apart, so every rider has about 1.6&nbsp;km to the rider ahead and the rider behind. Spots are drawn at random once registration closes.</dd>
+          <dd>The route is <a id="route-link" href="https://www.komoot.com/tour/3331824715">Denmark's biggest circle</a>, 578&nbsp;km around. It is split into 360 start spots, one degree apart: 578&nbsp;km&nbsp;÷&nbsp;360, about 1.6&nbsp;km between neighbouring spots, measured along the road. Spots are drawn at random once registration closes.</dd>
         </div>
         <div class="rule">
           <dt>One start, one direction</dt>
@@ -72,6 +73,30 @@
           <dd>One short crossing of about 100&nbsp;m is made by a ferry that shuttles back and forth on a fixed schedule. When several riders wait at the bank and cross on the same trip, whoever reached the bank first rolls off with a <strong id="ferry-minutes">2-minute</strong> head start on the others, so nobody gets caught just because of ferry timing.</dd>
         </div>
       </dl>
+    </section>
+
+    <section id="route" class="route" aria-labelledby="route-title">
+      <h2 id="route-title">The route</h2>
+      <div class="route-grid">
+        <div class="route-text">
+          <p>A loop through Jutland, from Aarhus out to the west coast and back. The 360 start spots are spread evenly along the road, one every <span id="route-gap">1.6&nbsp;km</span>. Spot 0 is in Aarhus and the numbers count up in the direction of travel.</p>
+          <dl class="facts">
+            <div><dt>Distance</dt><dd id="route-km">578 km</dd></div>
+            <div><dt>Climbing</dt><dd id="route-climb">–</dd></div>
+            <div><dt>Highest point</dt><dd id="route-max">–</dd></div>
+            <div><dt>Lowest point</dt><dd id="route-min">–</dd></div>
+          </dl>
+          <div class="downloads">
+            <a class="button" href="downloads/catch-359-route.gpx" download>Download the route (GPX)</a>
+            <a class="button secondary" href="downloads/catch-359-start-spots.gpx" download>Download the 360 start spots (GPX)</a>
+          </div>
+          <p class="small"><a id="route-komoot" href="https://www.komoot.com/tour/3331824715">Open the route on Komoot</a></p>
+        </div>
+        <figure class="profile">
+          <svg id="profile" role="img" aria-labelledby="profile-caption"></svg>
+          <figcaption id="profile-caption">Elevation along the route, from spot 0 in Aarhus.</figcaption>
+        </figure>
+      </div>
     </section>
 
     <section id="signup" class="signup" aria-labelledby="signup-title">
@@ -129,7 +154,7 @@
 
     <section id="startlist" class="startlist" aria-labelledby="startlist-title" hidden>
       <h2 id="startlist-title">Start list</h2>
-      <p>Each rider's spot is their position on the circle, in degrees from the start of the route. Point at the ring or search for a name.</p>
+      <p>Each rider's spot number is their position on the route, counted from spot 0 in Aarhus in the direction of travel. Point at the route or search for a name.</p>
       <div class="startlist-grid">
         <figure class="list-ring">
           <svg id="list-ring" class="ring" role="img" aria-label="Start positions of all riders on the circle"></svg>

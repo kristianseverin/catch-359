@@ -20,8 +20,6 @@ button.link:focus-visible { outline: 3px solid var(--red); }
 .control p { margin: 0 0 0.9rem; color: var(--muted); font-size: var(--step--1); }
 .btns { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .admin .button { font-size: var(--step-0); padding: 10px 18px; }
-.button.secondary { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
-.button.secondary:hover { color: var(--ink); background: var(--surface); }
 
 .admin-msg { min-height: 1.5em; font-weight: 600; }
 .admin-msg.is-error { color: var(--red); }
