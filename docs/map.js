@@ -1,5 +1,5 @@
 // Interactive route map (Leaflet) for the route section.
-// Street map from CARTO/OpenStreetMap, satellite from Esri. The route line and the
+// Street map from OpenStreetMap, satellite from Esri (neither needs an API key). The route line and the
 // 360 start spots come from route-track.json, made by tools/build_route.py.
 
 import { config } from './config.js';
@@ -35,9 +35,8 @@ export async function initRouteMap(el) {
   const map = L.map(el, { scrollWheelZoom: false, zoomSnap: 0.5 });
   el.leafletMap = map;   // handy for debugging in the browser console
 
-  const streets = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
+  const streets = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
   });
   const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -80,11 +79,14 @@ export async function initRouteMap(el) {
     return m.addTo(map);
   });
 
-  // Small spots at low zoom, bigger when zoomed in
+  // Zoomed out, spots are tiny pin-pricks on the red line; zoomed in, proper markers
   const sizeSpots = () => {
     const z = map.getZoom();
-    const r = z < 8.5 ? 2.5 : z < 10 ? 3.5 : 5;
-    markers.forEach((m, k) => m.setRadius(k === 0 ? r + 2.5 : r));
+    const [r, w] = z < 9 ? [1.4, 0] : z < 10.5 ? [3, 1.2] : [5, 1.5];
+    markers.forEach((m, k) => {
+      m.setRadius(k === 0 ? Math.max(r + 2.5, 4.5) : r);
+      m.setStyle({ weight: k === 0 ? 1.5 : w });
+    });
   };
   map.on('zoomend', sizeSpots);
   sizeSpots();

@@ -64,7 +64,7 @@ In the GitHub repository go to **Settings → Pages**, choose **Deploy from a br
 
 The coastline in `route/land.json` comes from [Natural Earth](https://www.naturalearthdata.com) (public domain), made with `python3 tools/fetch_basemap.py`; only re-run it if you change `MAP_EXTENT` in `tools/build_route.py`. Town names and positions are listed in `TOWNS` in the same file (from [GeoNames](https://www.geonames.org), CC BY 4.0); edit that list to add or remove towns, and use `side` to move a label.
 
-The interactive map uses [Leaflet](https://leafletjs.com) with street tiles from CARTO (OpenStreetMap data) and satellite imagery from Esri. Both are free for a small event site like this, with the credits shown in the corner of the map. CARTO's free basemaps are meant for non-commercial use with limited traffic; if the event site gets very busy or commercial, look at their terms or switch to another tile provider in `docs/map.js`.
+The interactive map uses [Leaflet](https://leafletjs.com) with street tiles from [OpenStreetMap](https://www.openstreetmap.org) and satellite imagery from Esri. Neither needs an API key, and the credits are shown in the corner of the map. OpenStreetMap's tile servers are run by volunteers and are fine for a small event site ([usage policy](https://operations.osmfoundation.org/policies/tiles/)); if the site gets heavy traffic, switch to a commercial tile provider in `docs/map.js`.
 
 If the route changes, replace `route/source.gpx` and run `python3 tools/build_route.py` (no extra packages needed), then commit the results. The GPX measures 580.8 km; spots are placed at equal fractions of that length, and km labels on the site use the official 578 km.
 
