@@ -23,7 +23,6 @@ function applyConfig() {
   }
   for (const a of [$('route-link'), $('footer-route')]) a.href = config.routeUrl;
   $('route-link').textContent = config.routeName;
-  $('ferry-minutes').textContent = `${config.ferryHeadstartMinutes}-minute`;
   if (config.contactEmail) {
     $('footer-contact').innerHTML = '';
     const a = document.createElement('a');
@@ -74,11 +73,6 @@ function renderRoute() {
   const pts = prof.map((m, i) => `${xs((i / (prof.length - 1)) * config.routeKm).toFixed(1)},${ys(m).toFixed(1)}`);
   add('path', { d: `M${xs(0)},${ys(0)} L${pts.join(' L')} L${xs(config.routeKm)},${ys(0)} Z`, class: 'profile-area' });
   add('path', { d: `M${pts.join(' L')}`, class: 'profile-line' });
-
-  if (config.ferryKm != null) {
-    add('line', { x1: xs(config.ferryKm), x2: xs(config.ferryKm), y1: T, y2: ys(0), class: 'profile-ferry' });
-    add('text', { x: xs(config.ferryKm) + 4, y: T + 8, class: 'profile-axis' }, 'Ferry');
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -103,8 +97,7 @@ function sampleStats() {
 // ---------------------------------------------------------------------------
 // Hero ring + registration state
 // ---------------------------------------------------------------------------
-const ferryDeg = config.ferryKm != null ? (config.ferryKm / config.routeKm) * 360 : null;
-const heroRing = createRing($('hero-ring'), { ferryDeg, animate: !reduceMotion });
+const heroRing = createRing($('hero-ring'), { animate: !reduceMotion });
 
 function renderStats(s) {
   const taken = Math.min(s.registered, s.capacity);
@@ -207,7 +200,7 @@ function renderStartList(riders) {
   $('nav-startlist').hidden = false;
 
   const byDeg = new Map(riders.map((r) => [r.start_degree, r]));
-  const ring = createRing($('list-ring'), { ferryDeg, animate: false });
+  const ring = createRing($('list-ring'), { animate: false });
   ring.setFilled(new Set(byDeg.keys()));
   ring.setInteractive(true);
 

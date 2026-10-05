@@ -32,7 +32,7 @@ function label(parent, spot, text, cls, dist = 26) {
  *   setInteractive(bool)  — allow pointing at spots
  *   onHover(fn), onSelect(fn)
  */
-export function createRing(svg, { ferryDeg = null, animate = true } = {}) {
+export function createRing(svg, { animate = true } = {}) {
   svg.setAttribute('viewBox', `0 0 ${route.width} ${route.height}`);
   svg.innerHTML = '';
 
@@ -61,13 +61,6 @@ export function createRing(svg, { ferryDeg = null, animate = true } = {}) {
   const start = el('g', { class: 'start-mark' }, svg);
   el('circle', { cx: s0.x, cy: s0.y, r: 4 }, start);
   label(start, s0, 'Spot 0, Aarhus', 'map-label', -12);   // inside the loop
-
-  if (ferryDeg != null) {
-    const s = route.spots[Math.round(ferryDeg) % 360];
-    const g = el('g', { class: 'ferry-mark' }, svg);
-    el('circle', { cx: s.x, cy: s.y, r: 4.5 }, g);
-    label(g, s, 'Ferry', 'map-label', -12);
-  }
 
   let hoverFn = () => {};
   let selectFn = () => {};

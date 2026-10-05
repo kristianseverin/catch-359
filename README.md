@@ -2,7 +2,7 @@
 
 Sign-up website for **Catch 359**: 360 ultra cyclists start one degree apart on Denmark's biggest circle (578 km). Everyone starts at once; if the rider behind you catches you, you're out. Last rider standing wins.
 
-- **Public page** (`docs/index.html`): event info and rules (including the ferry head-start rule), the real route drawn with its 360 start spots, an elevation profile, GPX downloads of the route and of all 360 start spots, the sign-up form, and — once you publish the draw — the start list with every rider's degree and km.
+- **Public page** (`docs/index.html`): event info and rules, the real route drawn with its 360 start spots, an elevation profile, GPX downloads of the route and of all 360 start spots, the sign-up form, and — once you publish the draw — the start list with every rider's degree and km.
 - **Organizer page** (`docs/admin.html`): log in, see every rider with contact and emergency details, withdraw riders, move riders up from the waitlist, run the random start-spot draw, publish it, and download everything as CSV.
 - **Database** (`supabase/schema.sql`): Supabase (Postgres) tables, security rules and functions.
 
@@ -48,8 +48,6 @@ Privacy: the public can only see counts and, after you publish, each rider's nam
    eventDate: '2027-06-12',
    contactEmail: 'hello@example.com',
    ```
-
-   Once you know where the ferry is, set `ferryKm` to its distance along the route and it's marked on the ring.
 
 ### 4. Publish on GitHub Pages
 

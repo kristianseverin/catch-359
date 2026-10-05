@@ -18,7 +18,4 @@ export const config = {
   routeName: "Denmark's biggest circle",
   routeUrl: 'https://www.komoot.com/tour/3331824715',
   routeKm: 578,
-
-  ferryKm: null,          // distance along the route where the ferry is, e.g. 214.5 — marks it on the ring
-  ferryHeadstartMinutes: 2,
 };
